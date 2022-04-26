@@ -16,10 +16,16 @@
             }
         };
         getMeasurements();
+        getMeasurementStats();
         async function getMeasurements() {
             let response = await axios.get('/measurement');
             model.measurements = response.data;
             updateView();
+        }
+
+        async function getMeasurementStats() {
+            let response = await axios.get('/measurementStats');
+            console.log(response.data);
         }
 
         function updateView() {
@@ -53,7 +59,9 @@
                             ${new Date(m.TimeStamp).toLocaleDateString()}
                             ${new Date(m.TimeStamp).toLocaleTimeString()}
                         Type: ${m.Type}
-                        Person: ${m.UserId}  </li>
+                        Person: ${m.UserId}
+                        <button onclick="deleteMeasurement('${m.Id}')">x</button>
+                    </li>
                     `).join('')}
                 </ul>
             `;
@@ -67,6 +75,12 @@
                 UserId: model.inputs.person,
             };
             const rowsAffected = await axios.post('/measurement', measurement);
+            console.log(rowsAffected);
+            getMeasurements();
+        }
+
+        async function deleteMeasurement(id) {
+            const rowsAffected = await axios.delete('/measurement/'+id);
             console.log(rowsAffected);
             getMeasurements();
         }
