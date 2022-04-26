@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div id="app"></div>
+    <script>
+        const model = {
+            inputs: {
+                value: null,
+                type: null,
+                person: null,
+            }
+        };
+        getMeasurements();
+        async function getMeasurements() {
+            let response = await axios.get('/measurement');
+            model.measurements = response.data;
+            updateView();
+        }
+
+        function updateView() {
+            document.getElementById('app').innerHTML = `
+
+                Måleverdi<br/>
+                <input
+                    type="number"
+                    oninput="model.inputs.value=this.valueAsNumber"
+                    value="${model.inputs.value}"
+                /><br/>
+                Type<br/>
+                <input
+                    type="text"
+                    oninput="model.inputs.type=this.value"
+                    value="${model.inputs.type||''}"
+                /><br/>
+                Person<br/>
+                <input
+                    type="text"
+                    oninput="model.inputs.person=this.value"
+                    value="${model.inputs.person||''}"
+                /><br/>
+                <button onclick="addNewMeasurement()">Legg til ny</button>
+
+                <ul>
+                    ${model.measurements.map(m => `
+                    <li>
+                        Måleverdi: ${m.Value}
+                        Tidspunkt:
+                            ${new Date(m.TimeStamp).toLocaleDateString()}
+                            ${new Date(m.TimeStamp).toLocaleTimeString()}
+                        Type: ${m.Type}
+                        Person: ${m.UserId}  </li>
+                    `).join('')}
+                </ul>
+            `;
+        }
+
+        async function addNewMeasurement() {
+            const measurement = {
+                Value: model.inputs.value,
+                TimeStamp: new Date(),
+                Type: model.inputs.type,
+                UserId: model.inputs.person,
+            };
+            const rowsAffected = await axios.post('/measurement', measurement);
+            console.log(rowsAffected);
+            getMeasurements();
+        }
+    </script>
+</body>
+</html>
